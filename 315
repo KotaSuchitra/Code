@@ -1,0 +1,55 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+typedef struct Pair{
+    int val;
+    int index;
+}Pair;
+
+int comparetor(const void *p, const void *q) {
+    Pair *p1 = (Pair *)p;
+    Pair *p2 = (Pair *)q;
+    if (p1->val == p2->val) {
+        if (p1->index < p2->index) return -1;
+        if (p1->index > p2->index) return 1;
+        return 0;
+    }
+    if (p1->val < p2->val) return -1;
+    return 1;
+}
+
+int range(int id, int *bit){
+    int ans = 0;
+    while(id>0){
+        ans += bit[id];
+        id -= (id & -id);
+    }
+    return ans;
+}
+
+void update(int val, int id, int n, int *bit){
+    while(id<=n){
+        bit[id] += val;
+        id += (id & -id);
+    }
+}
+int* countSmaller(int* nums, int numsSize, int* returnSize) {
+    Pair *pair = (Pair *)malloc(sizeof(Pair)*numsSize);
+    int *bit = (int *)calloc(numsSize + 1, sizeof(int));
+    int *ans = (int *)malloc(sizeof(int)*(numsSize));
+
+    for(int i=0; i<numsSize; i++){
+        pair[i].val = nums[i];
+        pair[i].index = i;
+    }
+
+    qsort(pair, numsSize, sizeof(Pair), comparetor);
+    
+    for(int i=0; i<numsSize; i++){
+        int idx = pair[i].index;
+        update(1, idx+1, numsSize, bit);
+        ans[idx] = range(numsSize, bit) - range(idx+1, bit);
+    }
+    *returnSize = numsSize;
+    return ans;
+}
