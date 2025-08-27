@@ -1,0 +1,115 @@
+
+
+#define TABLE_SIZE 100000
+#define BASE_URL "http://tinyurl.com/"
+
+struct node{
+    char key[5000];
+    char value[10000];
+    struct node *next;
+};
+
+struct node *hashtable[TABLE_SIZE];
+
+unsigned int hash(const char *key)
+{
+    unsigned int hashvalue=0;
+    while(*key)
+    {
+        hashvalue=(hashvalue*31) + *key++;
+    }
+    return hashvalue % TABLE_SIZE;
+}
+
+void insert(const char *key,const char *value)
+{
+    unsigned int index=hash(key);
+    struct node *new=malloc(sizeof(struct node));
+    strcpy(new->key,key);
+    strcpy(new->value,value);
+    new->next=NULL;
+
+    if(hashtable[index]==NULL)
+    {
+        hashtable[index]=new;
+    }
+    else
+    {
+        struct node *temp=hashtable[index];
+        while(temp->next != NULL)
+        {
+            if(strcmp(temp->key,key)==0)
+            {
+                strcpy(temp->value,value);
+                free(new);
+                return;
+            }
+            temp=temp->next;
+        }
+        if(strcmp(temp->key,key)==0)
+        {
+            strcpy(temp->value,value);
+            free(new);
+            return;
+        }
+        temp->next=new;
+
+    }
+}
+
+char *search(const char *key)
+{
+    unsigned int index=hash(key);
+    struct node *temp=hashtable[index];
+
+    while(temp)
+    {
+        if(strcmp(temp->key,key)==0)
+        {
+            return temp->value;
+        }
+        temp=temp->next;
+    }
+    return NULL;
+}
+void generateCode(int id, char* code) {
+    char map[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    int base = 62;
+    char temp[10];
+    int i = 0;
+    while (id > 0) {
+        temp[i++] = map[id % base];
+        id /= base;
+    }
+    temp[i] = '\0';
+    // Reverse string
+    for (int j = 0; j < i; j++) {
+        code[j] = temp[i - j - 1];
+    }
+    code[i] = '\0';
+}
+/** Encodes a URL to a shortened URL. */
+char* encode(char* longUrl) {
+    static int id = 1;
+    char code[10];
+    generateCode(id++, code);
+
+    static char shortUrl[200];
+    strcpy(shortUrl, BASE_URL);
+    strcat(shortUrl, code);
+
+    insert(shortUrl, longUrl);
+    return shortUrl;
+    
+}
+
+/** Decodes a shortened URL to its original URL. */
+char* decode(char* shortUrl) {
+      char* original = search(shortUrl);
+    if (original) return original;
+    return "URL not found";
+}
+
+// Your functions will be called as such:
+// char* s = encode(s);
+// decode(s);
