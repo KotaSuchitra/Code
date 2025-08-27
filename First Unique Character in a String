@@ -1,0 +1,80 @@
+#define TABLE_SIZE 26 // Only lowercase letters a-z in this problem
+
+typedef struct Node
+{
+    char key;       // the character
+    int count;      // occurrence count
+    int firstIndex; // first index in string
+    struct Node *next;
+} Node;
+
+Node *hashTable[TABLE_SIZE];
+
+// Hash function for lowercase letters
+int hash(char key)
+{
+    return (key - 'a') % TABLE_SIZE;
+}
+
+// Search for a char in hash table
+Node *search(char key)
+{
+    int hashIndex = hash(key);
+    Node *temp = hashTable[hashIndex];
+    while (temp != NULL)
+    {
+        if (temp->key == key)
+            return temp;
+        temp = temp->next;
+    }
+    return NULL;
+}
+
+// Insert or update
+void insert(char key, int index)
+{
+    int hashIndex = hash(key);
+    Node *found = search(key);
+    if (found)
+    {
+        found->count++;
+    }
+    else
+    {
+        Node *newNode = malloc(sizeof(Node));
+        newNode->key = key;
+        newNode->count = 1;
+        newNode->firstIndex = index;
+        newNode->next = hashTable[hashIndex];
+        hashTable[hashIndex] = newNode;
+    }
+}
+
+int firstUniqChar(char *s)
+{
+    int n = strlen(s);
+
+    // Initialize table
+    for (int i = 0; i < TABLE_SIZE; i++)
+    {
+        hashTable[i] = NULL;
+    }
+
+    // First pass: insert counts
+    for (int i = 0; i < n; i++)
+    {
+        insert(s[i], i);
+    }
+
+    // Second pass: find first with count 1
+    for (int i = 0; i < n; i++)
+    {
+        Node *found = search(s[i]);
+        if (found && found->count == 1)
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
