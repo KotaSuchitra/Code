@@ -1,0 +1,48 @@
+/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     struct TreeNode *left;
+ *     struct TreeNode *right;
+ * };
+ */
+#define MAX_NODE ((int)1e4)
+
+typedef struct {
+    int depth;
+    struct TreeNode* node;
+} pair_t;
+
+typedef struct {
+    pair_t arr[MAX_NODE];
+    int front;
+    int rear;
+} queue_t;
+
+void enqueue(queue_t* q, struct TreeNode* node, int depth) {
+    q->arr[q->rear++] = (pair_t){depth, node};
+}
+
+pair_t dequeue(queue_t* q) {
+    return q->arr[q->front++];
+}
+
+bool empty(queue_t* q) {
+    return q->front == q->rear;
+}
+
+int maxDepth(struct TreeNode* root) {
+    if (!root) return 0;
+    queue_t* q = (queue_t*)malloc(sizeof(queue_t));
+    q->front = q->rear = 0;
+    enqueue(q, root, 1);
+    int maxdepth = 0;
+    while (!empty(q)) {
+        pair_t curr = dequeue(q);
+        if (curr.depth > maxdepth) maxdepth = curr.depth;
+        if (curr.node->left) enqueue(q, curr.node->left, curr.depth + 1);
+        if (curr.node->right) enqueue(q, curr.node->right, curr.depth + 1);
+    }
+    free(q);
+    return maxdepth;
+}
