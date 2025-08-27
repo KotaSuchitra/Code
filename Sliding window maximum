@@ -1,0 +1,23 @@
+/**
+ * Note: The returned array must be malloced, assume caller calls free().
+ */
+int* maxSlidingWindow(int* nums, int n, int k, int* returnSize) {
+    int* res = (int*)malloc((n - k + 1) * sizeof(int));
+    int* dq = (int*)malloc(n * sizeof(int)); 
+    int left = 0, right = 0, idx = 0;
+
+    for (int i = 0; i < n; i++) {
+        while (left < right && nums[dq[right - 1]] < nums[i]) right--;
+        dq[right++] = i;
+
+        if (dq[left] <= i - k) left++;
+
+        if (i >= k - 1) {
+            res[idx++] = nums[dq[left]];
+        }
+    }
+
+    *returnSize = idx;
+    free(dq);
+    return res;
+}
